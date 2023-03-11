@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "extension-cli": "^1.2.4"
+    "extension-cli": "^1.2.4",
+    "microsoft-cognitiveservices-speech-sdk": "^1.26.0"
   }
 }

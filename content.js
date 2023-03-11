@@ -1,3 +1,5 @@
+const sdk = require("microsoft-cognitiveservices-speech-sdk");
+
 let audioContext = new AudioContext();
 let processorURL = chrome.runtime.getURL("modules/IntermediateAudioProcessor.js");
 async function createMyAudioProcessor() {
