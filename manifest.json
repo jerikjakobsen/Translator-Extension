@@ -8,12 +8,12 @@
             "matches": [
                 "<all_urls>"
             ],
-            "js": ["dist/bundle.js"]
+            "js": ["dist/content-bundle.js"]
         }
     ],
     "web_accessible_resources": [
         {
-            "resources": ["modules/IntermediateAudioProcessor.js"],
+            "resources": ["dist/IntermediateAudioProcessor-bundle.js"],
             "matches": ["<all_urls>"]
         }
     ]

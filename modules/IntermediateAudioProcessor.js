@@ -1,16 +1,22 @@
-import * as sdk from "microsoft-cognitiveservices-speech-sdk"
-import { translateSpeechToText } from "./AudioTranslator.js";
 
 class IntermediateAudioProcessor extends AudioWorkletProcessor {
   constructor() {
     super()
-
-    this.pushStream = sdk.AudioInputStream.createPushStream();
-    translateSpeechToText(this.pushStream);
+    console.log("In the Audio Processor Code")
+    
+    this.messagingPort = null;
+    this.port.onmessage = (event) => {
+      if (event.data.port) {
+        this.messagingPort = event.data.port;
+        this.messagingPort.start();
+      }
+    };
   }
   process(inputs, outputs, parameters) {
-    //console.log("In the Audio Processor Code")
-    this.pushStream.write(inputs[0][0].buffer)
+    if (inputs[0] && inputs[0][0]) {
+      let audioData = inputs[0][0].buffer
+      this.messagingPort.postMessage({ type: 'audioData', audioData: audioData }, [audioData]);
+    }
     return true;
   }
 }
