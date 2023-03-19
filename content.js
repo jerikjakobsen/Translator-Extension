@@ -1,10 +1,11 @@
 import io from 'socket.io-client';
 
-let audioContext = new AudioContext();
+let audioContext;
 let processorURL = chrome.runtime.getURL("dist/IntermediateAudioProcessor-bundle.js");
 async function createMyAudioProcessor() {
+    console.log("Updated!")
     try {
-        audioContext = new AudioContext();
+        if (!audioContext) audioContext = new AudioContext({sampleRate: 44100});
         await audioContext.resume();
         await audioContext.audioWorklet.addModule(processorURL, {
             credentials: 'omit',
@@ -36,7 +37,7 @@ function waitForAudio(selector) {
         });
     });
 }
-
+let playing = false;
 createMyAudioProcessor().then(audioProcessor => {
     const messageChannel = new MessageChannel();
     let socket = io("http://localhost:3000")
@@ -47,7 +48,9 @@ createMyAudioProcessor().then(audioProcessor => {
     messageChannel.port2.onmessage = (event) => {
     if (event.data.type === 'audioData') {
         // Send the audio data to the server using socket.io-client
-        socket.emit('audioData', event.data.audioData);
+        if (playing) {
+            socket.emit('audioData', new Float32Array(event.data.audioData));
+        }
     }
     };
     var vid = document.getElementsByTagName('video')[0]
@@ -58,37 +61,16 @@ createMyAudioProcessor().then(audioProcessor => {
         stream.addEventListener("addtrack", (event) => {
             if (!alreadyAdded && event.track.kind === 'audio') {
                 alreadyAdded = true
-                console.log("Creating and connecting node")
                 let audioSourceNode = audioContext.createMediaStreamSource(stream)
                 audioSourceNode.connect(audioProcessor)
             }
         });
+        vid.addEventListener("play", () => {
+            playing = true;
+        })
+        vid.addEventListener("pause", () => {
+            playing = false;
+        })
     }
     
 })
-
-
-/*
-
-{
-    "manifest_version": 3,
-    "name": "Translator",
-    "description": "Translating videos on the fly.",
-    "version": "1.0",
-    "content_scripts": [
-        {
-            "matches": [
-                "<all_urls>"
-            ],
-            "js": ["dist/bundle.js"]
-        }
-    ],
-    "web_accessible_resources": [
-        {
-            "resources": ["modules/IntermediateAudioProcessor.js"],
-            "matches": ["<all_urls>"]
-        }
-    ]
-}
-
-*/
