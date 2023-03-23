@@ -7,7 +7,7 @@ const server = http.createServer((req, res) => {
     res.end();
   });
 const io = require('socket.io')(server, {cors: {
-  origin: "https://www.youtube.com",
+  origin: "*",
   methods: ["GET", "POST"]
 }});
 

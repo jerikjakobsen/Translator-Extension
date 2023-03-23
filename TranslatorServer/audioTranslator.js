@@ -1,5 +1,4 @@
 const sdk = require("microsoft-cognitiveservices-speech-sdk");
-const { Writable } = require('stream');
 
 class Translator {
     constructor() {
@@ -13,7 +12,7 @@ class Translator {
         this.recognizer = new sdk.TranslationRecognizer(translationConfig, audioConfig);
         // Create an AudioConfig to handle the audio data
         this.recognizer.recognizing = (s, e) => {
-            //console.log(`RECOGNIZING: Text=${e.result.text}`);
+            console.log(`RECOGNIZING: Text=${e.result.text}`);
         }
 
         this.recognizer.recognized = (s, e) => {

@@ -18,15 +18,16 @@ async function createMyAudioProcessor() {
   return new AudioWorkletNode(audioContext, "intermediate-audio-processor");
 }
 
-function waitForAudio(selector) {
+async function waitForAudio() {
     return new Promise(resolve => {
-        if (document.querySelector(selector)) {
-            return resolve(document.querySelector(selector));
+        if (document.getElementsByTagName('video')) {
+            return resolve(document.getElementsByTagName('video'));
         }
+        console.log("waiting")
 
         const observer = new MutationObserver(mutations => {
-            if (document.querySelector(selector)) {
-                resolve(document.querySelector(selector));
+            if (document.getElementsByTagName('video')) {
+                resolve(document.getElementsByTagName('video'));
                 observer.disconnect();
             }
         });
@@ -38,7 +39,7 @@ function waitForAudio(selector) {
     });
 }
 let playing = false;
-createMyAudioProcessor().then(audioProcessor => {
+createMyAudioProcessor().then(async (audioProcessor) => {
     const messageChannel = new MessageChannel();
     let socket = io("http://localhost:3000")
     // Send the port to the audio processor
@@ -53,6 +54,7 @@ createMyAudioProcessor().then(audioProcessor => {
         }
     }
     };
+    await waitForAudio()
     var vid = document.getElementsByTagName('video')[0]
     console.log("In the Content.js Code")
     if (vid != null) {
