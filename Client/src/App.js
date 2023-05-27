@@ -29,13 +29,16 @@ function App(props) {
     setElementClickEnabled(true);
   };
 
+  const startTranslating = () => {
+    translator.startTranslating(clickedElement);
+  };
 
   return (
     <div className="App">
       <h1>ELEMENT: {clickedElement ? clickedElement.tagName : "No element selected"}</h1>
       <button onClick={selectVideo} disabled={elementClickEnabled}>Select Video</button>
       <h2>{clickedElement ? "Video Element Found" : "No Video Element Found"}</h2>
-      
+      <button onClick={} disabled={}>Start Translating</button>
     </div>
   );
 }

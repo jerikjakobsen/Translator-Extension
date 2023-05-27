@@ -1,0 +1,75 @@
+const sdk = require("microsoft-cognitiveservices-speech-sdk");
+
+const languages = require("./languages.json").translation
+
+class Translator {
+    constructor() {
+        this.translationConfig = sdk.SpeechTranslationConfig.fromSubscription("4841be7b45b14ab58ef98cf417587d28", "eastus");
+        this.translationConfig.outputFormat = sdk.OutputFormat.Detailed;
+    }
+
+    setLanguages(fromLang, toLang) {
+        if ((fromLang in languages) || (toLang in languages)) {
+            return false
+        }
+        this.fromLang = fromLang;
+        this.toLang = toLang;
+        this.translationConfig.speechRecognitionLanguage = fromLang; //"en-US";
+        this.translationConfig.addTargetLanguage(toLang);
+        return true;
+    }
+
+    connect(recognizedCallback, recognizingCallback) {
+
+        this.pushStream = sdk.AudioInputStream.createPushStream(sdk.AudioStreamFormat.getWaveFormatPCM(44100, 32, 1))
+        const audioConfig = sdk.AudioConfig.fromStreamInput(this.pushStream);
+        this.recognizer = new sdk.TranslationRecognizer(translationConfig, audioConfig);
+        // Create an AudioConfig to handle the audio data
+        this.recognizer.recognizing = (s, e) => {
+            if (e.result.errorDetails) {
+                console.log(e.result.errorDetails)
+                recognizingCallback(null, e.result.errorDetails);
+            } else {
+                console.log(`RECOGNIZING: Text=${e.result.text}`);
+                console.log(`RECOGNIZING TRANSLATED: Text = ${e.result.translations.get(toLang)}` )
+                recognizingCallback({recognizingText: e.result.text, translatedText: e.result.translations.get(toLang)})
+            }
+        }
+
+        this.recognizer.recognized = (s, e) => {
+            if (e.result.errorDetails) {
+                console.log(e.result.errorDetails)
+                recognizedCallback(null, e.result.errorDetails);
+            } else {
+                console.log(`RECOGNIZED: Text=${e.result.text}`);
+                console.log(`RECOGNIZED TRANSLATED: Text = ${e.result.translations.get(toLang)}` )
+                recognizedCallback({recognizedText: e.result.text, translatedText: e.result.translations.get(toLang)})
+            }
+            
+        }
+    }
+
+    startWritingStream() {
+        // Start the recognition
+        this.recognizer.startContinuousRecognitionAsync(
+            () => {
+                console.log("Speech recognition started");
+            },
+            (error) => {
+                console.error(error);
+            }
+        );
+    }
+
+    writeToStream(audioBuffer) {
+        //console.log(audioBuffer)
+        this.pushStream.write(audioBuffer)
+    }
+
+    endStream() {
+        this.pushStream.close()
+        this.recognizer.stopContinuousRecognitionAsync()
+    }
+}
+
+module.exports = Translator;
