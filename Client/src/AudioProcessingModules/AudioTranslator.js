@@ -1,21 +1,23 @@
 import io from 'socket.io-client';
 
 export default class AudioTranslator {
-    audioContext;
-    processorURL = chrome.runtime.getURL("../build/static/js/IntermediateAudioProcessor.js");
-    workletNode;
-    playing = false;
-    socket;
-    stream;
+    constructor(processorURL) {
+        this.audioContext = undefined;
+        this.processorURL = processorURL;
+        this.workletNode = undefined;
+        this.playing = false;
+        this.socket = undefined;
+        this.stream = undefined;
+    }
 
     async #createAudioProcessor() {
         try {
             if (!this.audioContext) this.audioContext = new AudioContext({sampleRate: 44100});
-            await audioContext.resume();
-            await audioContext.audioWorklet.addModule(processorURL, {
+            await this.audioContext.resume();
+            await this.audioContext.audioWorklet.addModule(this.processorURL, {
                 credentials: 'omit',
               });
-            this.workletNode = new AudioWorkletNode(audioContext, "intermediate-audio-processor");
+            this.workletNode = new AudioWorkletNode(this.audioContext, "intermediate-audio-processor");
         } catch (err) {
             throw err
         }
@@ -34,18 +36,18 @@ export default class AudioTranslator {
             messageChannel.port2.onmessage = (event) => {
                 if (event.data.type === 'audioData' && this.playing) {
                     // Send the audio data to the server using socket.io-client
-                    socket.emit('audioData', new Float32Array(event.data.audioData));
+                    this.socket.emit('audioData', new Float32Array(event.data.audioData));
                 }
             };
 
             if (videoElement != null) {
                 this.stream = videoElement.captureStream()
                 let alreadyAdded = false
-                stream.addEventListener("addtrack", (event) => {
+                this.stream.addEventListener("addtrack", (event) => {
                     if (!alreadyAdded && event.track.kind === 'audio') {
                         alreadyAdded = true
-                        let audioSourceNode = audioContext.createMediaStreamSource(stream)
-                        audioSourceNode.connect(workletNode)
+                        let audioSourceNode = this.audioContext.createMediaStreamSource(this.stream)
+                        audioSourceNode.connect(this.workletNode)
                     }
                 });
                 videoElement.addEventListener("play", () => {
@@ -62,7 +64,7 @@ export default class AudioTranslator {
 
     async stopTranslating() {
         let tracks = this.stream.getTracks();
-        for (track in tracks) {
+        for (var track in tracks) {
             this.stream.removeTrack(track);
         }
         this.stream = undefined;
@@ -70,6 +72,6 @@ export default class AudioTranslator {
         this.socket.disconnect();
         this.socket = undefined;
 
-        playing = false;
+        this.playing = false;
     }
 }

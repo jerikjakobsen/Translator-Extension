@@ -6,12 +6,13 @@ import Frame, { FrameContextConsumer }from 'react-frame-component';
 import App from "./App";
 class Main extends React.Component {
     render() {
+        let doc = document;
         return (
             <Frame head={[<link type="text/css" rel="stylesheet" href={chrome.runtime.getURL("/static/css/content.css")} ></link>]}> 
                <FrameContextConsumer>
                {
                   ({document, window}) => {
-                    return <App document={document} window={window} isExt={true}/> 
+                    return <App document={document} window={window} chrome={chrome} outerDocument={doc} isExt={true}/> 
                   }
                 }
                 </FrameContextConsumer>
