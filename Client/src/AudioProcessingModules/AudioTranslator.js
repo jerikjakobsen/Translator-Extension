@@ -1,8 +1,8 @@
 import io from 'socket.io-client';
 
-export class AudioTranslator {
+export default class AudioTranslator {
     audioContext;
-    processorURL = chrome.runtime.getURL("dist/IntermediateAudioProcessor-bundle.js");
+    processorURL = chrome.runtime.getURL("../build/static/js/IntermediateAudioProcessor.js");
     workletNode;
     playing = false;
     socket;
