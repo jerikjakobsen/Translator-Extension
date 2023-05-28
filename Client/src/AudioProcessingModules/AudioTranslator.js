@@ -1,9 +1,9 @@
 import io from 'socket.io-client';
 
 export default class AudioTranslator {
-    constructor() {
+    constructor(processorURL) {
         this.audioContext = null;
-        this.processorURL = "../../build/static/js/IntermediateAudioProcessor.js";
+        this.processorURL = processorURL;
         this.workletNode = null;
         this.playing = false;
         this.socket = io("http://localhost:3000")
@@ -36,7 +36,6 @@ export default class AudioTranslator {
 
     async startTranslating(videoElement) {
         try {
-            this.stopTranslating();
             if (!this.workletNode) {
                 await this.#createAudioProcessor();
             }
@@ -44,23 +43,23 @@ export default class AudioTranslator {
 
             this.workletNode.port.postMessage({ port: messageChannel.port1 }, [messageChannel.port1]);
 
-            messageChannel.port2.onmessage = (event) => {
+            messageChannel.port2.onmessage = ((event) => {
                 if (event.data.type === 'audioData' && this.playing) {
                     // Send the audio data to the server using socket.io-client
                     this.socket.emit('audioData', new Float32Array(event.data.audioData));
                 }
-            };
+            }).bind(this);
 
             if (videoElement != null) {
                 this.stream = videoElement.captureStream();
                 let alreadyAdded = false;
-                this.stream.addEventListener("addtrack", (event) => {
+                this.stream.addEventListener("addtrack", ((event) => {
                     if (!alreadyAdded && event.track.kind === 'audio') {
                         alreadyAdded = true;
                         let audioSourceNode = this.audioContext.createMediaStreamSource(this.stream);
                         audioSourceNode.connect(this.workletNode);
                     }
-                });
+                }).bind(this));
                 videoElement.addEventListener("play", () => {
                     this.playing = true;
                 })
@@ -80,12 +79,15 @@ export default class AudioTranslator {
                 this.stream.removeTrack(track);
             }
         }
+
+        this.playing = false;
+    }
+
+    async disconnect() {
         this.stream = null;
         if (this.socket) {
             this.socket.disconnect();
             this.socket = null;
         }
-
-        this.playing = false;
     }
 }
