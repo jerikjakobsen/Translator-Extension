@@ -1,4 +1,3 @@
-
 class IntermediateAudioProcessor extends AudioWorkletProcessor {
   constructor() {
     super()
