@@ -1,13 +1,24 @@
 import io from 'socket.io-client';
 
 export default class AudioTranslator {
-    constructor(processorURL) {
-        this.audioContext = undefined;
-        this.processorURL = processorURL;
-        this.workletNode = undefined;
+    constructor() {
+        this.audioContext = null;
+        this.processorURL = "../../build/static/js/IntermediateAudioProcessor.js";
+        this.workletNode = null;
         this.playing = false;
-        this.socket = undefined;
-        this.stream = undefined;
+        this.socket = io("http://localhost:3000")
+        this.stream = null;
+    }
+
+    setReceiveFunctions(translatedCallback, translatingCallback) {
+        this.socket.off("recognizedText");
+        this.socket.off("recognizingText");
+        this.socket.on("recognizedText", data => {
+            translatedCallback(data.recognizedText, data.translatedText);
+        });
+        this.socket.on("recognizingText", data => {
+            translatingCallback(data.recognizedText, data.translatedText);
+        });
     }
 
     async #createAudioProcessor() {
@@ -19,17 +30,17 @@ export default class AudioTranslator {
               });
             this.workletNode = new AudioWorkletNode(this.audioContext, "intermediate-audio-processor");
         } catch (err) {
-            throw err
+            throw err;
         }
     }
 
     async startTranslating(videoElement) {
         try {
+            this.stopTranslating();
             if (!this.workletNode) {
                 await this.#createAudioProcessor();
             }
             const messageChannel = new MessageChannel();
-            this.socket = io("http://localhost:3000")
 
             this.workletNode.port.postMessage({ port: messageChannel.port1 }, [messageChannel.port1]);
 
@@ -41,13 +52,13 @@ export default class AudioTranslator {
             };
 
             if (videoElement != null) {
-                this.stream = videoElement.captureStream()
-                let alreadyAdded = false
+                this.stream = videoElement.captureStream();
+                let alreadyAdded = false;
                 this.stream.addEventListener("addtrack", (event) => {
                     if (!alreadyAdded && event.track.kind === 'audio') {
-                        alreadyAdded = true
-                        let audioSourceNode = this.audioContext.createMediaStreamSource(this.stream)
-                        audioSourceNode.connect(this.workletNode)
+                        alreadyAdded = true;
+                        let audioSourceNode = this.audioContext.createMediaStreamSource(this.stream);
+                        audioSourceNode.connect(this.workletNode);
                     }
                 });
                 videoElement.addEventListener("play", () => {
@@ -58,19 +69,22 @@ export default class AudioTranslator {
                 })
             }
         } catch (err) {
-            throw err
+            throw err;
         }
     }
 
     async stopTranslating() {
-        let tracks = this.stream.getTracks();
-        for (var track in tracks) {
-            this.stream.removeTrack(track);
+        if (this.stream) {
+            let tracks = this.stream.getTracks();
+            for (var track in tracks) {
+                this.stream.removeTrack(track);
+            }
         }
-        this.stream = undefined;
-
-        this.socket.disconnect();
-        this.socket = undefined;
+        this.stream = null;
+        if (this.socket) {
+            this.socket.disconnect();
+            this.socket = null;
+        }
 
         this.playing = false;
     }
