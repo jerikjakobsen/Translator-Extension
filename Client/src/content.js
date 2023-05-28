@@ -2,8 +2,9 @@
 /* src/content.js */
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Frame, { FrameContextConsumer }from 'react-frame-component';
+import Frame, { FrameContextConsumer } from 'react-frame-component';
 import App from "./App";
+
 class Main extends React.Component {
     render() {
         let doc = document;
@@ -26,9 +27,7 @@ app.id = "my-extension-root";
 
 document.body.appendChild(app);
 ReactDOM.render(<Main />, app);
-
 app.style.display = "none";
-console.log("CONTENT")
 chrome.runtime.onMessage.addListener(
    function(request, sender, sendResponse) {
       if(request.message === "clicked_browser_action") {
