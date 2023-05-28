@@ -1,11 +1,15 @@
 const sdk = require("microsoft-cognitiveservices-speech-sdk");
+require("dotenv").config()
+
 
 const languages = require("./languages.json").translation
 
 class Translator {
     constructor() {
-        this.translationConfig = sdk.SpeechTranslationConfig.fromSubscription("4841be7b45b14ab58ef98cf417587d28", "eastus");
+        this.translationConfig = sdk.SpeechTranslationConfig.fromSubscription(process.env.KEY, "eastus");
         this.translationConfig.outputFormat = sdk.OutputFormat.Detailed;
+        this.translationConfig.speechRecognitionLanguage = "en-US";
+        this.translationConfig.addTargetLanguage('es');
     }
 
     setLanguages(fromLang, toLang) {
@@ -23,7 +27,7 @@ class Translator {
 
         this.pushStream = sdk.AudioInputStream.createPushStream(sdk.AudioStreamFormat.getWaveFormatPCM(44100, 32, 1))
         const audioConfig = sdk.AudioConfig.fromStreamInput(this.pushStream);
-        this.recognizer = new sdk.TranslationRecognizer(translationConfig, audioConfig);
+        this.recognizer = new sdk.TranslationRecognizer(this.translationConfig, audioConfig);
         // Create an AudioConfig to handle the audio data
         this.recognizer.recognizing = (s, e) => {
             if (e.result.errorDetails) {

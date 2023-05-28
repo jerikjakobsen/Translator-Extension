@@ -6,15 +6,15 @@ class TranslatorSocket {
     events = {
         "initData": {
             "code": 0,
-            "handler": this.initData,
+            "handler": this.initData.bind(this)
         },
         "audioData": {
             "code": 1,
-            "handler": this.audioData
+            "handler": this.audioData.bind(this)
         },
         "disconnect": {
             "code": 2,
-            "handler": this.disconnect
+            "handler": this.disconnect.bind(this)
         }
     }
 
@@ -22,13 +22,12 @@ class TranslatorSocket {
 
         this.firstConnect = true;
         this.receivedInitData = false;
-
         this.translator = new Translator();
         this.translator.connect(this.recognizedCallback, this.recognizingCallback);
 
         this.socket = socket;
 
-        for (const [eventName, eventDetails] in Object.entries(this.events)) {
+        for (const [eventName, eventDetails] of Object.entries(this.events)) {
             socket.on(eventName, eventDetails.handler)
         }
     }
@@ -60,7 +59,7 @@ class TranslatorSocket {
 
     disconnect() {
         console.log('Disconnected!');
-        translator.endStream();
+        this.translator.endStream();
         this.socket.disconnect();
     }
 
@@ -97,7 +96,7 @@ class TranslatorSocket {
               message,
               code: this.events[event].code
             }
-          })
+          }.bind(this))
     }
 
     sendSuccess(event, message) {
@@ -107,7 +106,7 @@ class TranslatorSocket {
               message: message,
               code: this.events[event].code
             }
-          })
+          }.bind(this))
     }
 
 }
