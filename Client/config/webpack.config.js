@@ -297,6 +297,9 @@ module.exports = function (webpackEnv) {
       ],
     },
     resolve: {
+      alias: {
+        'socket.io-client': path.join( __dirname, 'node_modules', 'socket.io-client', 'dist', 'socket.io.js' )
+    },
       // This allows you to set a fallback for where webpack should look for modules.
       // We placed these paths second because we want `node_modules` to "win"
       // if there are any conflicts. This matches Node resolution mechanism.
