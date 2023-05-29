@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import './App.css';
 import AudioTranslator from './AudioProcessingModules/AudioTranslator'
+import LanguageDropdown from './LanguageDropdown';
 
 function App(props) {
   let {chrome, outerDocument, window} = props;
@@ -34,6 +35,9 @@ function App(props) {
   const [recognizedText, setRecognizedText] = useState("");
   const [translatedText, setTranslatedText] = useState("");
   const [startedTranslating, setStartedTranslating] = useState(false);
+  const [fromLang, setFromLang] = useState("es");
+  const [toLang, setToLang] = useState("en");
+
   outerDocument.addEventListener('click', (event) => {
     if (!elementClickEnabled) {
       return
@@ -57,6 +61,7 @@ function App(props) {
   };
 
   const startTranslating = () => {
+    translatorRef.current.sendLangs(fromLang, toLang);
     translatorRef.current.startTranslating(clickedElement);
     setStartedTranslating(true);
   };
@@ -67,11 +72,19 @@ function App(props) {
     setStartedTranslating(false);
   }
 
+  const onUpdateFromLanguage = (lang) => {
+    setFromLang(lang);
+  }
+  const onUpdateToLanguage = (lang) => {
+    setToLang(lang);
+  }
+
   return (
     <div className="App">
-      <h1>ELEMENT: {clickedElement ? clickedElement.tagName : "No element selected"}</h1>
       <button onClick={selectVideo} disabled={elementClickEnabled}>Select Video</button>
       <h2>{clickedElement ? "Video Element Found" : "No Video Element Found"}</h2>
+      <LanguageDropdown onUpdateLanguage={onUpdateFromLanguage} title="From Language"/>
+      <LanguageDropdown onUpdateLanguage={onUpdateToLanguage} title="To Language"/>
       <button onClick={startTranslating} disabled={startedTranslating}>Start Translating</button>
       <p>{recognizedText.length == 0 ? "No Recognized Text" : recognizedText}</p>
       <p>{translatedText.length == 0 ? "No Translated Text" : translatedText}</p>
