@@ -34,6 +34,10 @@ export default class AudioTranslator {
         }
     }
 
+    async sendLangs(fromLang, toLang) {
+        this.socket.emit('initData', {fromLang, toLang});
+    }
+
     async startTranslating(videoElement) {
         try {
             if (!this.workletNode) {
