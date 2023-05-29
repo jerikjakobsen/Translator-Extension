@@ -1,14 +1,18 @@
 const http = require('http');
 const express = require('express');
 const app = express();
+const cors = require('cors')
 const TranslatorSocket = require("./TranslatorSocket.js");
 const languages = require("./languages.json");
+
+app.use(cors());
+
 app.get('/availableLanguages', (req, res) => {
   const namesToCodes = Object.entries(languages.translation).map(([key, val]) => {
-    var nameToCode = {};
-    nameToCode[val.name] = key;
+    var nameToCode = {name: val.name, code: key};
     return nameToCode;
   });
+  console.log(namesToCodes)
   res.status(200).json(namesToCodes);
 })
 
