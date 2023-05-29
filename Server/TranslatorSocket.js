@@ -65,15 +65,17 @@ class TranslatorSocket {
 
     audioData(data) {
         if (!this.receivedInitData) return;
-        if (firstConnect) {
-            firstConnect = false
-            translator.startWritingStream()
-          }
+        if (this.firstConnect) {
+            this.firstConnect = false
+            this.translator.startWritingStream()
+        }
+        console.log("received data: ", data)
         this.translator.writeToStream(data)
     }
 
     initData(data) {
-        if (!receivedInitData) {
+        console.log(data)
+        if (!this.receivedInitData) {
           const {fromLang, toLang} = data;
           if (fromLang == undefined || toLang == undefined) {
             console.log("Missing from or to language");
@@ -81,10 +83,12 @@ class TranslatorSocket {
             return;
           }
           if (!this.translator.setLanguages(fromLang, toLang)) {
+            console.log("Couldnt find language")
             this.sendError("initData", "Could not find Language(s)")
             return;
           }
           this.receivedInitData = true;
+          console.log("Set recievedInit to true")
           this.sendSuccess("initData", "Successfully set languages")
         }
       }
@@ -96,7 +100,7 @@ class TranslatorSocket {
               message,
               code: this.events[event].code
             }
-          }.bind(this))
+          })
     }
 
     sendSuccess(event, message) {
@@ -106,7 +110,7 @@ class TranslatorSocket {
               message: message,
               code: this.events[event].code
             }
-          }.bind(this))
+          })
     }
 
 }

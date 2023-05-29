@@ -13,7 +13,7 @@ class Translator {
     }
 
     setLanguages(fromLang, toLang) {
-        if ((fromLang in languages) || (toLang in languages)) {
+        if (!(fromLang in languages) || !(toLang in languages)) {
             return false
         }
         this.fromLang = fromLang;
