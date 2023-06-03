@@ -23,7 +23,7 @@ class TranslatorSocket {
         this.firstConnect = true;
         this.receivedInitData = false;
         this.translator = new Translator();
-        this.translator.connect(this.recognizedCallback, this.recognizingCallback);
+        this.translator.connect(this.recognizedCallback.bind(this), this.recognizingCallback.bind(this));
 
         this.socket = socket;
 
@@ -69,12 +69,10 @@ class TranslatorSocket {
             this.firstConnect = false
             this.translator.startWritingStream()
         }
-        console.log("received data: ", data)
         this.translator.writeToStream(data)
     }
 
     initData(data) {
-        console.log(data)
         if (!this.receivedInitData) {
           const {fromLang, toLang} = data;
           if (fromLang == undefined || toLang == undefined) {
@@ -88,7 +86,6 @@ class TranslatorSocket {
             return;
           }
           this.receivedInitData = true;
-          console.log("Set recievedInit to true")
           this.sendSuccess("initData", "Successfully set languages")
         }
       }

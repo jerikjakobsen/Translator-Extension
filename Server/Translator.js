@@ -34,9 +34,7 @@ class Translator {
                 console.log(e.result.errorDetails)
                 recognizingCallback(null, e.result.errorDetails);
             } else {
-                console.log(`RECOGNIZING: Text=${e.result.text}`);
-                console.log(`RECOGNIZING TRANSLATED: Text = ${e.result.translations.get(toLang)}` )
-                recognizingCallback({recognizingText: e.result.text, translatedText: e.result.translations.get(toLang)})
+                recognizingCallback({recognizingText: e.result.text, translatedText: e.result.translations.get(this.toLang)}, null)
             }
         }
 
@@ -45,9 +43,7 @@ class Translator {
                 console.log(e.result.errorDetails)
                 recognizedCallback(null, e.result.errorDetails);
             } else {
-                console.log(`RECOGNIZED: Text=${e.result.text}`);
-                console.log(`RECOGNIZED TRANSLATED: Text = ${e.result.translations.get(toLang)}` )
-                recognizedCallback({recognizedText: e.result.text, translatedText: e.result.translations.get(toLang)})
+                recognizedCallback({recognizedText: e.result.text, translatedText: e.result.translations.get(this.toLang)}, null)
             }
             
         }
@@ -66,7 +62,6 @@ class Translator {
     }
 
     writeToStream(audioBuffer) {
-        //console.log(audioBuffer)
         this.pushStream.write(audioBuffer)
     }
 

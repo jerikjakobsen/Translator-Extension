@@ -12,7 +12,6 @@ app.get('/availableLanguages', (req, res) => {
     var nameToCode = {name: val.name, code: key};
     return nameToCode;
   });
-  console.log(namesToCodes)
   res.status(200).json(namesToCodes);
 })
 
