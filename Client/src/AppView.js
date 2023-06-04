@@ -3,6 +3,7 @@ import LanguageDropdown from './LanguageDropdown';
 
 function AppView(props) {
   let {selectVideoHandler,
+    autoFindVideoHandler,
     fromLanguageChangeHandler,
     toLanguageChangeHandler,
     startTranslatingHandler,
@@ -19,6 +20,7 @@ function AppView(props) {
   return (
     <div className="App">
       <button onClick={selectVideoHandler} disabled={disableVideoSelector}>Select Video</button>
+      <button onClick={autoFindVideoHandler} disabled={disableVideoSelector}>Auto-Select Video</button>
       <h2>{videoElementFound ? "Video Element Found" : "No Video Element Found"}</h2>
       <LanguageDropdown onUpdateLanguage={fromLanguageChangeHandler} title="From Language" defaultValue={fromLanguage}/>
       <LanguageDropdown onUpdateLanguage={toLanguageChangeHandler} title="To Language" defaultValue={toLanguage}/>

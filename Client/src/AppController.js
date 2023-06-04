@@ -31,9 +31,9 @@ function AppController(props) {
       }
     } catch (err) {
         setVideoElement(null);
-      setDisableVideoSelector(false);
+        setDisableVideoSelector(false);
     } finally {
-      outerDocument.removeEventListener('click', handleClickEvent);
+        outerDocument.removeEventListener('click', handleClickEvent);
     }
   }
   
@@ -45,24 +45,25 @@ function AppController(props) {
   }
 
   useEffect(() => {
-
     translatorRef.current = new AudioTranslator(
-      chrome.runtime.getURL("static/js/IntermediateAudioProcessor.js")
+      chrome.runtime.getURL("static/js/IntermediateAudioProcessor.js",),
+      getTranslated,
+      getTranslated
     );
-    translatorRef.current.setReceiveFunctions(getTranslated, getTranslated);
 
     return () => {
       // Clean up
       if (translatorRef.current) {
         translatorRef.current.stopTranslating();
-        translatorRef.current.disconnect();
         translatorRef.current = null;
       }
     };
   }, []);
 
   useEffect(() => {
-    
+    if (videoElement == null || videoElement == undefined) {
+        // add source to audioTranslator for audio
+    }
   }, [videoElement])
 
   const selectVideo = () => {
@@ -70,15 +71,31 @@ function AppController(props) {
     outerDocument.addEventListener('click', handleClickEvent);
   };
 
+  const autoSelectVideo = (e) => {
+    setDisableVideoSelector(true);
+    try {
+        let vid = outerDocument.getElementsByTagName('video')[0];
+        if (vid.tagName != "VIDEO") {
+            setVideoElement(null);
+            setDisableVideoSelector(false);
+        } else {
+            setVideoElement(vid);
+            setDisableVideoSelector(true);
+        }
+
+    } catch (err) {
+        setVideoElement(null);
+        setDisableVideoSelector(false);
+    }
+  }
+
   const startTranslating = () => {
-    translatorRef.current.sendLangs(fromLang, toLang);
-    translatorRef.current.startTranslating(videoElement);
+    translatorRef.current.startTranslating(videoElement, fromLang, toLang);
     setIsTranslating(true);
   };
 
   const stopTranslating = () => {
     translatorRef.current.stopTranslating();
-    translatorRef.current.disconnect();
     setIsTranslating(false);
   }
 
@@ -92,6 +109,7 @@ function AppController(props) {
   return (
     <AppView 
         selectVideoHandler={selectVideo}
+        autoFindVideoHandler={autoSelectVideo}
         fromLanguageChangeHandler={onUpdateFromLanguage}
         toLanguageChangeHandler={onUpdateToLanguage}
         startTranslatingHandler={startTranslating}
