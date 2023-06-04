@@ -1,10 +1,10 @@
 import {useState, useRef, useEffect} from 'react'
 import styles from "./LanguageDropdown.module.css"
 
-export default function LanguageDropdown({onUpdateLanguage, title}) {
+export default function LanguageDropdown({onUpdateLanguage, title, defaultValue}) {
 
     const availableLanguagesRef = useRef([]);
-    const [selectedLanguage, setSelectedLanguage] = useState('es');
+    const [selectedLanguage, setSelectedLanguage] = useState(defaultValue);
     const [availableLanguages, setAvailableLanguages] = useState(availableLanguagesRef.current);
     const [error, setError] = useState(null);
 
