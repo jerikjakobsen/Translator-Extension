@@ -3,7 +3,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Frame, { FrameContextConsumer } from 'react-frame-component';
-import App from "./App";
+import AppController from "./AppController";
 
 class Main extends React.Component {
     render() {
@@ -13,7 +13,7 @@ class Main extends React.Component {
                <FrameContextConsumer>
                {
                   ({document, window}) => {
-                    return <App document={document} window={window} chrome={chrome} outerDocument={doc} isExt={true}/> 
+                    return <AppController document={document} window={window} chrome={chrome} outerDocument={doc} isExt={true}/> 
                   }
                 }
                 </FrameContextConsumer>

@@ -1,32 +1,39 @@
 import { useState, useEffect, useRef } from 'react';
-import './App.css';
 import AudioTranslator from './AudioProcessingModules/AudioTranslator'
-import LanguageDropdown from './LanguageDropdown';
+import AppView from './AppView';
 
-function App(props) {
+function AppController(props) {
   let {chrome, outerDocument, window} = props;
 
-  const [clickedElement, setClickedElement] = useState(null);
-  const [elementClickEnabled, setElementClickEnabled] = useState(false);
+  const [videoElement, setVideoElement] = useState(null);
+  const [disableVideoSelector, setDisableVideoSelector] = useState(false);
   const [recognizedText, setRecognizedText] = useState("");
   const [translatedText, setTranslatedText] = useState("");
-  const [startedTranslating, setStartedTranslating] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(false);
   const [fromLang, setFromLang] = useState("es");
   const [toLang, setToLang] = useState("en");
 
   const handleClickEvent = (event) => {
+    event.preventDefault();
     try {
       if (event.target.tagName != "VIDEO") {
         let videoChild = event.target.getElementsByTagName('video')[0];
-        setClickedElement(videoChild);
+        if (videoChild.tagName != "VIDEO") {
+            setVideoElement(null);
+          setDisableVideoSelector(false);
+        } else {
+        setVideoElement(videoChild);
+          setDisableVideoSelector(true);
+        }
       } else {
-        setClickedElement(event.target);
+        setVideoElement(event.target);
+        setDisableVideoSelector(true);
       }
     } catch (err) {
-      setClickedElement(null);
+        setVideoElement(null);
+      setDisableVideoSelector(false);
     } finally {
       outerDocument.removeEventListener('click', handleClickEvent);
-      setElementClickEnabled(false);
     }
   }
   
@@ -54,22 +61,25 @@ function App(props) {
     };
   }, []);
 
+  useEffect(() => {
+    
+  }, [videoElement])
+
   const selectVideo = () => {
-    window.console.log("setting element click to true")
-    setElementClickEnabled(true);
+    setDisableVideoSelector(true);
     outerDocument.addEventListener('click', handleClickEvent);
   };
 
   const startTranslating = () => {
     translatorRef.current.sendLangs(fromLang, toLang);
-    translatorRef.current.startTranslating(clickedElement);
-    setStartedTranslating(true);
+    translatorRef.current.startTranslating(videoElement);
+    setIsTranslating(true);
   };
 
   const stopTranslating = () => {
     translatorRef.current.stopTranslating();
     translatorRef.current.disconnect();
-    setStartedTranslating(false);
+    setIsTranslating(false);
   }
 
   const onUpdateFromLanguage = (lang) => {
@@ -80,17 +90,22 @@ function App(props) {
   }
 
   return (
-    <div className="App">
-      <button onClick={selectVideo} disabled={elementClickEnabled}>Select Video</button>
-      <h2>{clickedElement ? "Video Element Found" : "No Video Element Found"}</h2>
-      <LanguageDropdown onUpdateLanguage={onUpdateFromLanguage} title="From Language" defaultValue={fromLang}/>
-      <LanguageDropdown onUpdateLanguage={onUpdateToLanguage} title="To Language" defaultValue={toLang}/>
-      <button onClick={startTranslating} disabled={startedTranslating}>Start Translating</button>
-      <p>{recognizedText.length == 0 ? "No Recognized Text" : recognizedText}</p>
-      <p>{translatedText.length == 0 ? "No Translated Text" : translatedText}</p>
-      <button onClick={stopTranslating} disabled={!startedTranslating}>Stop Translating</button>
-    </div>
+    <AppView 
+        selectVideoHandler={selectVideo}
+        fromLanguageChangeHandler={onUpdateFromLanguage}
+        toLanguageChangeHandler={onUpdateToLanguage}
+        startTranslatingHandler={startTranslating}
+        stopTranslatingHandler={stopTranslating}
+        disableVideoSelector={disableVideoSelector}
+        videoElementFound={videoElement != null && videoElement != undefined}
+        isTranslating={isTranslating}
+        fromLanguage={fromLang}
+        toLanguage={toLang}
+        recognizedText={recognizedText}
+        translatedText={translatedText}
+    >
+    </AppView>
   );
 }
 
-export default App;
+export default AppController;
