@@ -17,7 +17,7 @@ export default class AudioTranslator {
             translatedCallback(data.recognizedText, data.translatedText);
         });
         this.socket.on("recognizingText", data => {
-            translatingCallback(data.recognizedText, data.translatedText);
+            translatingCallback(data.recognizingText, data.translatedText);
         });
     }
 
@@ -29,20 +29,6 @@ export default class AudioTranslator {
                 credentials: 'omit',
               });
             this.workletNode = new AudioWorkletNode(this.audioContext, "intermediate-audio-processor");
-        } catch (err) {
-            throw err;
-        }
-    }
-
-    async sendLangs(fromLang, toLang) {
-        this.socket.emit('initData', {fromLang, toLang});
-    }
-
-    async startTranslating(videoElement) {
-        try {
-            if (!this.workletNode) {
-                await this.#createAudioProcessor();
-            }
             const messageChannel = new MessageChannel();
 
             this.workletNode.port.postMessage({ port: messageChannel.port1 }, [messageChannel.port1]);
@@ -53,24 +39,53 @@ export default class AudioTranslator {
                     this.socket.emit('audioData', new Float32Array(event.data.audioData));
                 }
             }).bind(this);
+        } catch (err) {
+            throw err;
+        }
+    }
 
-            if (videoElement != null) {
-                this.stream = videoElement.captureStream();
-                let alreadyAdded = false;
-                this.stream.addEventListener("addtrack", ((event) => {
-                    if (!alreadyAdded && event.track.kind === 'audio') {
-                        alreadyAdded = true;
-                        let audioSourceNode = this.audioContext.createMediaStreamSource(this.stream);
-                        audioSourceNode.connect(this.workletNode);
-                    }
-                }).bind(this));
-                videoElement.addEventListener("play", () => {
-                    this.playing = true;
-                })
-                videoElement.addEventListener("pause", () => {
-                    this.playing = false;
-                })
+    async sendLangs(fromLang, toLang) {
+        this.socket.emit('initData', {fromLang, toLang});
+    }
+    
+    #connectAudioSource(event) {
+        if (!this.alreadyAdded && event.track.kind === 'audio') {
+            this.alreadyAdded = true;
+            let audioSourceNode = this.audioContext.createMediaStreamSource(this.stream);
+            audioSourceNode.connect(this.workletNode);
+        }
+    }
+
+    setStreamSourceToNode() {
+        this.stream.removeEventListener("addtrack", this.#connectAudioSource.bind(this));
+        this.alreadyAdded = false;
+        this.stream.addEventListener("addtrack", this.#connectAudioSource.bind(this));
+    }
+
+    async startTranslating(videoElement) {
+        try {
+            if (!this.workletNode) {
+                await this.#createAudioProcessor();
             }
+
+            if (!videoElement) {
+                throw new Error("Video element is not available");
+            }
+
+            videoElement.addEventListener("play", (() => {
+                this.playing = true;
+            }).bind(this))
+            videoElement.addEventListener("pause", (() => {
+                this.playing = false;
+            }).bind(this))
+            this.playing = !videoElement.paused;
+            
+            this.stream = videoElement.captureStream();
+            if (!this.stream) {
+                throw new Error("Could not create stream from video element");
+            }
+            
+            this.setStreamSourceToNode();
         } catch (err) {
             throw err;
         }
@@ -85,9 +100,7 @@ export default class AudioTranslator {
         }
 
         this.playing = false;
-    }
 
-    async disconnect() {
         this.stream = null;
         if (this.socket) {
             this.socket.disconnect();
