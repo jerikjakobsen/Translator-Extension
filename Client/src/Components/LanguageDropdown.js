@@ -1,4 +1,6 @@
 import {useState, useRef, useEffect} from 'react'
+import Header from "./Header"
+import Text from './Text'
 import styles from "./LanguageDropdown.module.css"
 
 export default function LanguageDropdown({onUpdateLanguage, title, defaultValue}) {
@@ -27,8 +29,8 @@ export default function LanguageDropdown({onUpdateLanguage, title, defaultValue}
     }
     return (
         <div className={styles.container}>
-            <h4 className={styles.title}>{title}</h4>
-            {error ? <p>{error}</p> :
+            <Header>{title}</Header>
+            {error ? <Text>{error}</Text> :
             <select value={selectedLanguage} onChange={onSelection} className={styles.customSelect}>
                 {availableLanguages.map(lang => {
 

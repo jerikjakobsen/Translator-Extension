@@ -15,7 +15,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["/static/css/content.css", "/static/media/*", "/static/js/IntermediateAudioProcessor.js"],
+      "resources": ["/static/css/content.css", "/media/*", "/static/js/IntermediateAudioProcessor.js"],
       "matches": ["<all_urls>"]
     }
   ]
