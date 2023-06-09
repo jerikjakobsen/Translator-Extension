@@ -1,14 +1,14 @@
 import './App.css';
-import LanguageDropdown from './Components/LanguageDropdown';
+import Text from './Components/Text';
 import SelectVideoView from './Components/SelectVideoView';
-import Button from './Components/Button'
+import Header from './Components/Header';
+import Button from './Components/Button';
 import React from 'react';
+import {Link} from 'react-router-dom';
 
 function AppView(props) {
   const {selectVideoHandler,
     autoFindVideoHandler,
-    fromLanguageChangeHandler,
-    toLanguageChangeHandler,
     startTranslatingHandler,
     stopTranslatingHandler,
     disableVideoSelector = false,
@@ -22,14 +22,15 @@ function AppView(props) {
 
   return (
     <div className="App">
+      <Link to="/settings" style={{alignSelf: "flex-end", textDecoration: "none"}} state={{from: "main", langPreferences: JSON.stringify({from: fromLanguage, to: toLanguage})}}><Text>Settings</Text></Link>
+      <Header n={3}>Translator</Header>
       <SelectVideoView 
         selectVideoHandler={selectVideoHandler}
         autoFindVideoHandler={autoFindVideoHandler}
         disableVideoSelector={disableVideoSelector}
         videoElementFound={videoElementFound}
       />
-      <LanguageDropdown onUpdateLanguage={fromLanguageChangeHandler} title="From Language" defaultValue={fromLanguage}/>
-      <LanguageDropdown onUpdateLanguage={toLanguageChangeHandler} title="To Language" defaultValue={toLanguage}/>
+      <Text>{`${fromLanguage} -> ${toLanguage}`}</Text>
       <Button onClick={startTranslatingHandler} disabled={isTranslating || !videoElementFound} text="Start Translating"/>
       <p>{recognizedText.length == 0 ? "No Recognized Text" : recognizedText}</p>
       <p>{translatedText.length == 0 ? "No Translated Text" : translatedText}</p>

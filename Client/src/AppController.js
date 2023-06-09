@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import AudioTranslator from './AudioProcessingModules/AudioTranslator'
 import AppView from './AppView';
+import { useLocation } from 'react-router-dom';
 
 function AppController(props) {
   let {chrome, outerDocument, window} = props;
@@ -44,12 +45,26 @@ function AppController(props) {
     setTranslatedText(translatedText);
   }
 
+  const location = useLocation();
+
   useEffect(() => {
     translatorRef.current = new AudioTranslator(
       chrome.runtime.getURL("static/js/IntermediateAudioProcessor.js",),
       getTranslated,
       getTranslated
     );
+    try {
+        const langPreferences = JSON.parse(location.state.langPreferences);
+        if (langPreferences.from) {
+            setFromLang(langPreferences.from);
+        }
+        if (langPreferences.to) {
+            setToLang(langPreferences.to);
+        }
+    } catch (err) {
+        setFromLang('en');
+        setToLang('es');
+    }
 
     return () => {
       // Clean up
@@ -110,8 +125,6 @@ function AppController(props) {
     <AppView 
         selectVideoHandler={selectVideo}
         autoFindVideoHandler={autoSelectVideo}
-        fromLanguageChangeHandler={onUpdateFromLanguage}
-        toLanguageChangeHandler={onUpdateToLanguage}
         startTranslatingHandler={startTranslating}
         stopTranslatingHandler={stopTranslating}
         disableVideoSelector={disableVideoSelector}

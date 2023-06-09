@@ -4,6 +4,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import Frame, { FrameContextConsumer } from 'react-frame-component';
 import AppController from "./AppController";
+import Settings from './Settings';
+import {
+  RouterProvider,
+  createMemoryRouter,
+} from "react-router-dom";
 
 class Main extends React.Component {
     render() {
@@ -13,7 +18,23 @@ class Main extends React.Component {
                <FrameContextConsumer>
                {
                   ({document, window}) => {
-                    return <AppController document={document} window={window} chrome={chrome} outerDocument={doc} isExt={true}/> 
+                    const routes = [
+                      {
+                        path: "/",
+                        element: <AppController document={document} window={window} chrome={chrome} outerDocument={doc} isExt={true}/>
+                      },
+                      {
+                        path: "/settings",
+                        element: <Settings />
+                      }
+                    ];
+                    const router = createMemoryRouter(routes, {
+                      initialEntries: ["/"],
+                      initialIndex: 1,
+                    });
+                    return (
+                      <RouterProvider router={router} />
+                    )
                   }
                 }
                 </FrameContextConsumer>

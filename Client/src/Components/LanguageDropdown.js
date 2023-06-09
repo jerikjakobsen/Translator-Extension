@@ -31,11 +31,10 @@ export default function LanguageDropdown({onUpdateLanguage, title, defaultValue}
         <div className={styles.container}>
             <Header>{title}</Header>
             {error ? <Text>{error}</Text> :
-            <select value={selectedLanguage} onChange={onSelection} className={styles.customSelect}>
+            <select value={selectedLanguage} onChange={onSelection} className={styles.customSelect} >
                 {availableLanguages.map(lang => {
-
                     return <option value={lang.code} >{lang.name}</option>
-    })}
+                })}
             </select>}
         </div>
     )
