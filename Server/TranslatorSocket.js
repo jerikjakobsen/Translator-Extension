@@ -22,8 +22,6 @@ class TranslatorSocket {
 
         this.firstConnect = true;
         this.receivedInitData = false;
-        this.translator = new Translator();
-        this.translator.connect(this.recognizedCallback.bind(this), this.recognizingCallback.bind(this));
 
         this.socket = socket;
 
@@ -59,12 +57,12 @@ class TranslatorSocket {
 
     disconnect() {
         console.log('Disconnected!');
-        this.translator.endStream();
-        this.socket.disconnect();
+        if (this.translator) this.translator.endStream();
+        if (this.socket) this.socket.disconnect();
     }
 
     audioData(data) {
-        if (!this.receivedInitData) return;
+        if (!this.receivedInitData || !this.translator) return;
         if (this.firstConnect) {
             this.firstConnect = false
             this.translator.startWritingStream()
@@ -80,13 +78,15 @@ class TranslatorSocket {
             this.sendError("initData", "Either fromLang or toLang is missing");
             return;
           }
-          if (!this.translator.setLanguages(fromLang, toLang)) {
-            console.log("Couldnt find language")
-            this.sendError("initData", "Could not find Language(s)")
-            return;
+          
+          try {
+            this.translator = new Translator(fromLang, toLang);
+            this.translator.connect(this.recognizedCallback.bind(this), this.recognizingCallback.bind(this));
+            this.receivedInitData = true;
+            this.sendSuccess("initData", "Successfully set languages");
+          } catch (err) {
+            console.log(err)
           }
-          this.receivedInitData = true;
-          this.sendSuccess("initData", "Successfully set languages")
         }
       }
 

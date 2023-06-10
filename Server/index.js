@@ -3,16 +3,21 @@ const express = require('express');
 const app = express();
 const cors = require('cors')
 const TranslatorSocket = require("./TranslatorSocket.js");
-const languages = require("./languages.json");
-
+const toLanguages = require("./languages.json");
+const fromLanguages = require("./fromLanguages.json")
 app.use(cors());
 
-app.get('/availableLanguages', (req, res) => {
-  const namesToCodes = Object.entries(languages.translation).map(([key, val]) => {
+app.get('/availableToLanguages', (req, res) => {
+  const namesToCodes = Object.entries(toLanguages.translation).map(([key, val]) => {
     var nameToCode = {name: val.name, code: key};
     return nameToCode;
   });
   res.status(200).json(namesToCodes);
+})
+
+app.get('/availableFromLanguages', (req, res) => {
+  
+  res.status(200).json(fromLanguages);
 })
 
 app.get("/", (req, res) => {

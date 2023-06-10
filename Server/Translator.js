@@ -2,25 +2,25 @@ const sdk = require("microsoft-cognitiveservices-speech-sdk");
 require("dotenv").config()
 
 
-const languages = require("./languages.json").translation
-
+const toLanguages = require("./languages.json").translation;
+const fromLanguages = require("./fromLanguages.json").map((element) => (element.code));
 class Translator {
-    constructor() {
+    constructor(fromLang, toLang) {
         this.translationConfig = sdk.SpeechTranslationConfig.fromSubscription(process.env.KEY, "eastus");
         this.translationConfig.outputFormat = sdk.OutputFormat.Detailed;
-        this.translationConfig.speechRecognitionLanguage = "en-US";
-        this.translationConfig.addTargetLanguage('es');
-    }
-
-    setLanguages(fromLang, toLang) {
-        if (!(fromLang in languages) || !(toLang in languages)) {
-            return false
+        const searchFromResult = fromLanguages.filter((val) => {
+            return val === fromLang
+        })
+        if (searchFromResult.length == 0) {
+            throw Error("From language not found.")
+        }
+        if (!(toLang in toLanguages)) {
+            throw Error("To language not found.")
         }
         this.fromLang = fromLang;
         this.toLang = toLang;
-        this.translationConfig.speechRecognitionLanguage = fromLang; //"en-US";
+        this.translationConfig.speechRecognitionLanguage = fromLang;
         this.translationConfig.addTargetLanguage(toLang);
-        return true;
     }
 
     connect(recognizedCallback, recognizingCallback) {
@@ -29,16 +29,16 @@ class Translator {
         const audioConfig = sdk.AudioConfig.fromStreamInput(this.pushStream);
         this.recognizer = new sdk.TranslationRecognizer(this.translationConfig, audioConfig);
         // Create an AudioConfig to handle the audio data
-        this.recognizer.recognizing = (s, e) => {
+        this.recognizer.recognizing = ((s, e) => {
             if (e.result.errorDetails) {
                 console.log(e.result.errorDetails)
                 recognizingCallback(null, e.result.errorDetails);
             } else {
                 recognizingCallback({recognizingText: e.result.text, translatedText: e.result.translations.get(this.toLang)}, null)
             }
-        }
+        }).bind(this);
 
-        this.recognizer.recognized = (s, e) => {
+        this.recognizer.recognized = ((s, e) => {
             if (e.result.errorDetails) {
                 console.log(e.result.errorDetails)
                 recognizedCallback(null, e.result.errorDetails);
@@ -46,7 +46,7 @@ class Translator {
                 recognizedCallback({recognizedText: e.result.text, translatedText: e.result.translations.get(this.toLang)}, null)
             }
             
-        }
+        }).bind(this);
     }
 
     startWritingStream() {

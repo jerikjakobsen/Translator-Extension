@@ -11,7 +11,7 @@ export default function LanguageDropdown({onUpdateLanguage, title, defaultValue}
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        fetch("http://localhost:3000/availableLanguages")
+        fetch(`http://localhost:3000/${title=="To Language" ? "availableToLanguages" : "availableFromLanguages"}`)
         .then(async res => {
             const json = await res.json();
             availableLanguagesRef.current = json;
