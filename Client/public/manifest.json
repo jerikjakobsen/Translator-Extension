@@ -1,0 +1,22 @@
+{
+    "name": "Translator",
+    "version": "1.0",
+    "manifest_version": 3,
+    "action": {},
+    "background": {
+      "service_worker": "background.js"
+    },
+    "content_scripts" : [
+      {
+        "matches": [ "<all_urls>" ],
+        "css": ["/static/css/main.css", "/static/css/content.css"],
+        "js": ["/static/js/content.js"]
+      }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["/static/css/content.css", "/media/*", "/static/js/IntermediateAudioProcessor.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

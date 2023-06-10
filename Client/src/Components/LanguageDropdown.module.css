@@ -1,0 +1,29 @@
+  .customSelect {
+    width: 100px;
+    
+  }
+
+  .customSelect select {
+    width: 60%;
+    height: 30px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+  }
+
+  .customSelect select:focus {
+    outline: none;
+  }
+
+  .customSelect select[multiple] {
+    height: 100px;
+  }
+
+  .container {
+    display: flex;
+    position: relative;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    margin: 1rem 0 1rem 0;
+  }
