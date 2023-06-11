@@ -18,10 +18,13 @@ export default function LanguageDropdown({onUpdateLanguage, title, defaultValue}
             setAvailableLanguages(availableLanguagesRef.current);
         })
         .catch((err) => {
-
             setError(err.message);
         })
     }, []);
+
+    useEffect(() => {
+        setSelectedLanguage(defaultValue);
+    }, [defaultValue])
 
     const onSelection = (event) => {
         setSelectedLanguage(event.target.value);

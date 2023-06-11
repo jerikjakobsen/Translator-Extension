@@ -11,8 +11,8 @@ function AppController(props) {
   const [recognizedText, setRecognizedText] = useState("");
   const [translatedText, setTranslatedText] = useState("");
   const [isTranslating, setIsTranslating] = useState(false);
-  const [fromLang, setFromLang] = useState("es");
-  const [toLang, setToLang] = useState("en");
+  const [fromLang, setFromLang] = useState("en-US");
+  const [toLang, setToLang] = useState("es");
 
   const handleClickEvent = (event) => {
     event.preventDefault();
@@ -62,8 +62,14 @@ function AppController(props) {
             setToLang(langPreferences.to);
         }
     } catch (err) {
-        setFromLang('en');
-        setToLang('es');
+        try {
+            chrome.storage.sync.get(["fromLang", "toLang"]).then(result => {
+                setFromLang(result.fromLang);
+                setToLang(result.toLang);
+            })
+        } catch (err) {
+            console.error("Couldn't fetch saved language preference")
+        }
     }
 
     return () => {
@@ -77,9 +83,9 @@ function AppController(props) {
 
   useEffect(() => {
     if (videoElement == null || videoElement == undefined) {
-        // add source to audioTranslator for audio
+        
     }
-  }, [videoElement])
+  }, [videoElement]);
 
   const selectVideo = () => {
     setDisableVideoSelector(true);

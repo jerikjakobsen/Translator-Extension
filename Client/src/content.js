@@ -25,7 +25,7 @@ class Main extends React.Component {
                       },
                       {
                         path: "/settings",
-                        element: <Settings />
+                        element: <Settings chrome={chrome}/>
                       }
                     ];
                     const router = createMemoryRouter(routes, {

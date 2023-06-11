@@ -1,19 +1,30 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import LanguageDropdown from "./Components/LanguageDropdown";
 import Header from "./Components/Header";
 import Text from "./Components/Text";
 
 export default function Settings(props) {
-    const [fromLang, setFromLang] = useState("en");
-    const [toLang, setToLang] = useState("es");
+    const {chrome} = props;
+
+    const [fromLang, setFromLang] = useState("");
+    const [toLang, setToLang] = useState("");
+
+    useEffect(() => {
+        chrome.storage.sync.get(["fromLang", "toLang"]).then(result => {
+            setFromLang(result.fromLang);
+            setToLang(result.toLang);
+        })
+    }, [])
 
     const fromLanguageChangeHandler = (lang) => {
         setFromLang(lang);
+        chrome.storage.sync.set({fromLang: lang});
     }
 
     const toLanguageChangeHandler = (lang) => {
         setToLang(lang);
+        chrome.storage.sync.set({toLang: lang});
     }
 
     return (

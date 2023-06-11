@@ -17,7 +17,7 @@ function AppView(props) {
     fromLanguage = 'en', 
     toLanguage = 'es',
     recognizedText = 'No text recognized',
-    translatedText = 'No text translated',
+    translatedText = 'No text translated'
   } = props;
 
   return (
