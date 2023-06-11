@@ -32,8 +32,8 @@ function AppView(props) {
       />
       <Text>{`${fromLanguage} -> ${toLanguage}`}</Text>
       <Button onClick={startTranslatingHandler} disabled={isTranslating || !videoElementFound} text="Start Translating"/>
-      <p>{recognizedText.length == 0 ? "No Recognized Text" : recognizedText}</p>
-      <p>{translatedText.length == 0 ? "No Translated Text" : translatedText}</p>
+      <Text>{recognizedText.length == 0 ? "No Recognized Text" : recognizedText}</Text>
+      <Text>{translatedText.length == 0 ? "No Translated Text" : translatedText}</Text>
       <Button onClick={stopTranslatingHandler} disabled={!isTranslating || !videoElementFound} text="Stop Translating"/>
     </div>
   );
